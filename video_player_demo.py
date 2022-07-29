@@ -1,6 +1,8 @@
 import sys
+from ui.gallery_widget import GalleryWidget
 from ui.query_results_widget import QueryResultsWidget
 from ui.query_widget import QueryWidget
+from ui.select_file_widget import SelectFileWidget
 
 from ui.video_player_widget import VideoPlayerWidget
 from utils.query_engine_dummy import QueryEngineDummy
@@ -22,41 +24,32 @@ class App(QWidget):
         super().__init__()
         self.setWindowTitle("Smart CCTV Demo")
 
-        # src = "/Users/kevin/Documents/projects/data/test_face/tc1/tom_cruise_test.mp4"
-
         self.query_engine = query_engine
+
         self.hbox = QHBoxLayout()
+        self.query_engine.set_gallery_data(video_file)
 
-        # self.open_file_button = QPushButton("Open video")
-        # self.open_file_button.clicked.connect(self.open_video_file)
-        # self.hbox.addWidget(self.open_file_button)
+        query_widget = QueryWidget(query_engine)
+        query_widget.query_changed.connect(self.query_changed)
 
-        if video_file is not None:
-            # self.open_video_file(video_file)
-            self.query_engine.set_gallery_data(video_file)
+        self.gallery_widget = GalleryWidget(self.query_engine, file=None)
 
-            query_widget = QueryWidget(query_engine)
-            query_widget.query_changed.connect(self.query_changed)
+        self.query_res_widget = QueryResultsWidget(query_engine.gallery_data)
+        self.query_res_widget.result_selected.connect(self.result_selected)
 
-            self.query_res_widget = QueryResultsWidget(query_engine.gallery_data)
-            # self.player_widget = VideoPlayerWidget(query_engine.gallery_data)
-            self.gallery_reader = query_engine.gallery.create_reader()
-            self.player_widget = VideoPlayerWidget(self.gallery_reader)
-            self.query_res_widget.result_selected.connect(self.result_selected)
-
-            self.hbox.addWidget(query_widget)
-            self.hbox.addWidget(self.player_widget)
-            self.hbox.addWidget(self.query_res_widget)
+        self.hbox.addWidget(query_widget)
+        self.hbox.addWidget(self.gallery_widget)
+        self.hbox.addWidget(self.query_res_widget)
 
         # vbox.addWidget(VideoPlayerWidget(src))
         self.setLayout(self.hbox)
 
     def result_selected(self, query_res):
-        self.player_widget.set_position(query_res.data_key)
+        self.gallery_widget.set_position(query_res.data_key)
 
     def query_changed(self, query):
         results, distmat = self.query_engine.query(query)
-        self.gallery_reader.set_distmat(distmat)
+        self.gallery_widget.set_distmat(distmat)
         self.query_res_widget.set_results(results)
 
     def open_video_file(self, fname=None):
@@ -76,11 +69,11 @@ class App(QWidget):
 
 def main():
     # query_engine = QueryEngineDummy()
-    query_engine = QueryEngineFace()
+    query_engine_face = QueryEngineFace()
     video_file = "/Users/kevin/Documents/projects/data/test_face/tc1/tom_cruise_test.mp4"
 
     app = QApplication(sys.argv)
-    a = App(query_engine, video_file)
+    a = App(query_engine_face, video_file)
     a.show()
     sys.exit(app.exec_())
 

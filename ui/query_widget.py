@@ -9,45 +9,53 @@ from PyQt5.QtGui import QPixmap
 import sys
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread
 import numpy as np
+from ui.select_file_widget import SelectFileWidget
 
 from ui.ui_utils import convert_img_cv_to_qt
+
+
+class _QueryWidget(QWidget):
+    def __init__(self, preview_img):
+        super().__init__()
+        # create the label that holds the image
+        # create a text label
+
+        vbox = QVBoxLayout()
+        self.image_view = QLabel()
+        # self.image_view.resize(self.disply_width, self.display_height)
+        vbox.addWidget(QLabel("Query"))
+        vbox.addWidget(self.image_view)
+        vbox.setAlignment(Qt.AlignTop)
+
+        self.setLayout(vbox)
+
+        self.image_view.setPixmap(convert_img_cv_to_qt(preview_img))
 
 
 class QueryWidget(QWidget):
     query_changed = pyqtSignal(dict)
 
-    def __init__(self, query_engine):
-        super().__init__()
-        # create the label that holds the image
-        # create a text label
+    def __init__(self, query_engine, file=None, parent=None) -> None:
+        super().__init__(parent)
 
         self.query_engine = query_engine
+        self.setFixedWidth(256)
 
-        vbox = QVBoxLayout()
-        self.label = QLabel(text="Query")
-        self.image_view = QLabel()
-        self.select_query = QPushButton(text="Open")
-        self.select_query.clicked.connect(self._select_query)
-        # self.image_view.resize(self.disply_width, self.display_height)
+        sel_file_widget = SelectFileWidget("Query", self._build_query_preview_widget, file=file)
+        sel_file_widget.file_closed.connect(self.on_file_closed)
 
-        vbox.addWidget(self.label)
-        vbox.addWidget(self.image_view)
-        vbox.addWidget(self.select_query)
-        vbox.setAlignment(Qt.AlignTop)
+        lay = QVBoxLayout()
+        lay.addWidget(sel_file_widget)
+        self.setLayout(lay)
 
-        self.setLayout(vbox)
+    def _build_query_preview_widget(self, file):
+        query_db = self.query_engine.create_query_db_from_image_files([file])
+        # query_db.data.open()
+        query = query_db[0]
+        preview_img = query_db.vis_box_lm(0)
+        self.query_changed.emit(query)
 
-    def _select_query(self):
-        fname = QFileDialog.getOpenFileName(self, 'Open file', './')
+        return _QueryWidget(preview_img)
 
-        if fname[0]:
-            query_img_file = fname[0]
-
-            query_db = self.query_engine.create_query_db_from_image_files([query_img_file])
-            # query_db.data.open()
-            query = query_db[0]
-            preview_img = query_db.vis_box_lm(0)
-
-            self.image_view.setPixmap(convert_img_cv_to_qt(preview_img))
-
-            self.query_changed.emit(query)
+    def on_file_closed(self):
+        pass

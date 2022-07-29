@@ -34,6 +34,7 @@ class QueryResultsWidget(QWidget):
         # create the label that holds the image
         # create a text label
 
+        self.setFixedWidth(500)
 
         vbox = QVBoxLayout()
 
