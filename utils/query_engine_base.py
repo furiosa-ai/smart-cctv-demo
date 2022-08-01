@@ -7,6 +7,7 @@ from ai_util.dataset import ImageDataset
 class QueryEngineBase:
     def __init__(self, topk=5) -> None:
         self.topk = topk
+        self.vis_best_only = False
 
     def set_gallery_data(self, path):
         self.gallery_data = ImageDataset(path, limit=None, frame_step=1)
@@ -21,3 +22,4 @@ class QueryEngineBase:
 
     def query(self, query, topk):
         raise NotImplementedError
+

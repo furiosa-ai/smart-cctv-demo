@@ -39,7 +39,7 @@ class QueryWidget(QWidget):
         super().__init__(parent)
 
         self.query_engine = query_engine
-        self.setFixedWidth(256)
+        self.setFixedWidth(400)
 
         sel_file_widget = SelectFileWidget("Query", self._build_query_preview_widget, file=file)
         sel_file_widget.file_closed.connect(self.on_file_closed)
@@ -52,7 +52,7 @@ class QueryWidget(QWidget):
         query_db = self.query_engine.create_query_db_from_image_files([file])
         # query_db.data.open()
         query = query_db[0]
-        preview_img = query_db.vis_box_lm(0)
+        preview_img = query_db.visualize(0)
         self.query_changed.emit(query)
 
         return _QueryWidget(preview_img)

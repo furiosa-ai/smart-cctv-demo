@@ -19,7 +19,8 @@ class QueryResultsItemWidget(QListWidgetItem):
     def __init__(self, data, query_res):
         frame_idx = query_res.data_key
         ts_sec = (frame_idx / (data.get_frame_count() - 1)) * data.get_length_sec()
-        text = str(datetime.timedelta(seconds=ts_sec))
+        time_str = str(datetime.timedelta(seconds=ts_sec))
+        text = f"{time_str} ({query_res.dist:.2f})"
 
         super().__init__(text)
 
@@ -29,7 +30,7 @@ class QueryResultsItemWidget(QListWidgetItem):
 class QueryResultsWidget(QWidget):
     result_selected = pyqtSignal(QueryResult)
 
-    def __init__(self, data):
+    def __init__(self, query_engine):
         super().__init__()
         # create the label that holds the image
         # create a text label
@@ -45,13 +46,13 @@ class QueryResultsWidget(QWidget):
 
         self.setLayout(vbox)
 
-        self.data = data
+        self.query_engine = query_engine
 
     def item_clicked(self, item):
         self.result_selected.emit(item.query_res)
 
     def set_results(self, query_results):
         for query_res in query_results:
-            self.listWidget.addItem(QueryResultsItemWidget(self.data, query_res))
+            self.listWidget.addItem(QueryResultsItemWidget(self.query_engine.gallery_data, query_res))
 
             # self.listWidget.addItem()

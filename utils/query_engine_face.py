@@ -1,15 +1,15 @@
 
 
-
+import os
 from ai_util.dataset import ImageDataset
 from utils.query_engine_base import QueryEngineBase
 
 
-from insightface.face_recognition import ArcFacePredictor, FaceExtractor, FaceGallery
-from insightface.recognition.arcface_torch.utils.face_extract import FaceExtractor
-from insightface.recognition.arcface_torch.utils.face_gallery import FaceGallery
+# from insightface.face_recognition import ArcFacePredictor, FaceExtractor, FaceGallery
 
-from yolov5_face.face_predictor import Yolov5FacePredictor
+# from yolov5_face.face_predictor import Yolov5FacePredictor
+
+from ext_modules import ArcFacePredictor, FaceExtractor, FaceGallery, Yolov5FacePredictor
 
 class QueryEngineFace(QueryEngineBase):
     def __init__(self, device="cpu", calib_mode=None, topk=5) -> None:
@@ -29,18 +29,23 @@ class QueryEngineFace(QueryEngineBase):
             normalize=True, batch_size=1, pad_batch=True).to(reg_dev)
 
         self.gallery = None
+        self.path = None
 
     def set_gallery_data(self, path):
+        self.path = path
         self.gallery_data = ImageDataset(path, limit=None, frame_step=1)
         self.process_gallery_data()
         return self.gallery_data
 
     def process_gallery_data(self):
+        gallery_cache_name = os.path.abspath(self.path).replace("/", "_")
+        print(gallery_cache_name)
         self.gallery = FaceGallery(
-            name="tom_cruise", 
+            name=gallery_cache_name, 
             data=self.gallery_data, 
             data_extr=FaceExtractor(self.face_det), 
-            feat_extr=self.feat_extr
+            feat_extr=self.feat_extr,
+            gallery_dir="galleries/face/"
         )
 
     def create_query_db_from_image_files(self, img_files):        

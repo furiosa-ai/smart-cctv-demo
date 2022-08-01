@@ -1,3 +1,4 @@
+from pathlib import Path
 import sys
 
 
@@ -27,17 +28,35 @@ class QueryResultsItemWidget(QListWidgetItem):
 
 
 class _GalleryWidget(QWidget):
-    def __init__(self, query_engine, video_file):
+    def __init__(self, video_analyze_widget, video_file):
         super().__init__()
         
-        self.query_engine = query_engine
+        video_file = Path(video_file)
+        if video_file.suffix in (".jpg", ".png"):
+            # take folder
+            video_file = video_file.parent
+
+        self.video_analyze_widget = video_analyze_widget
+        self.query_engine = video_analyze_widget.query_engine
         self.query_engine.set_gallery_data(video_file)
-        self.gallery_reader = query_engine.gallery.create_reader()
+        self.gallery_reader = self.query_engine.gallery.create_reader(img_size=640)
         self.player_widget = VideoPlayerWidget(self.gallery_reader)
 
         lay = QVBoxLayout()
         lay.addWidget(self.player_widget)
         self.setLayout(lay)
+
+        self.video_analyze_widget.settings_changed.connect(self.settings_changed)
+        self.settings_changed()
+
+    def settings_changed(self):
+        keys = ["vis_best_only"]
+
+        for key in keys:
+            if key in self.video_analyze_widget.settings:
+                self.gallery_reader.update_settings(**{key: self.video_analyze_widget.settings[key]})
+
+        self.player_widget.redraw_frame()
 
     def set_position(self, data_key):
         self.player_widget.set_position(data_key)
@@ -47,10 +66,10 @@ class _GalleryWidget(QWidget):
 
 
 class GalleryWidget(QWidget):
-    def __init__(self, query_engine, file=None, parent=None) -> None:
+    def __init__(self, video_analyze_widget, file=None, parent=None) -> None:
         super().__init__(parent)
 
-        self.sel_file_widget = SelectFileWidget("Video", lambda file: _GalleryWidget(query_engine, file), file=file)
+        self.sel_file_widget = SelectFileWidget("Video", lambda file: _GalleryWidget(video_analyze_widget, file), file=file)
 
         lay = QVBoxLayout()
         lay.addWidget(self.sel_file_widget)
