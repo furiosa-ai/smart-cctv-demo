@@ -158,7 +158,9 @@ class VideoPlayerWidget(QWidget):
         qt_img = convert_img_cv_to_qt(cv_img, (self.disply_width, self.display_height))
         self.image_label.setPixmap(qt_img)
 
+        self.frame_idx_edit.blockSignals(True)
         self.frame_idx_edit.setText(str(frame_idx))
+        self.frame_idx_edit.blockSignals(False)
 
     def set_position(self, pos):
         self.video_playback.stop_playback()
