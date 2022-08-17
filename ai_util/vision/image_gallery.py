@@ -64,6 +64,8 @@ class ImageGallery:
         self.key_freq = np.inf
         self.gallery_dir = Path(gallery_dir)
 
+        self.gallery_dir.mkdir(parents=True, exist_ok=True)
+
         if name is None or not self.load(nonexist_ok=True):
             if data_extr is not None:
                 self._extract_data(data_extr)

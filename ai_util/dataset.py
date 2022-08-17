@@ -50,13 +50,13 @@ class ImageDataset:
             self.src = self.path
         elif Path(self.path).is_dir():
             self.src = sorted(Path(self.path).glob("*"))
-            assert len(self.src) > 0
+            assert len(self.src) > 0, f"Could not open {self.path}"
         elif self.is_video():
             self.src = cv2.VideoCapture(str(self.path))
-            assert self.src.isOpened()
+            assert self.src.isOpened(), f"Could not open {self.path}"
         else:
             self.src = glob.glob(self.path)
-            assert len(self.src) > 0
+            assert len(self.src) > 0, f"Could not open {self.path}"
 
         self.fps = self.fps if isinstance(self.src, list) else self.src.get(cv2.CAP_PROP_FPS)
         self.length = len(self.src) if isinstance(self.src, list) else int(self.src.get(cv2.CAP_PROP_FRAME_COUNT))

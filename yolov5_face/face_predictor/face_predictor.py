@@ -48,8 +48,11 @@ def scale_coords_landmarks(img1_shape, coords, img0_shape, ratio_pad=None):
 
 
 class Yolov5FacePredictor(PredictorBase):
-    def __init__(self, weights, cfg=None, img_size=640, conf_thres=0.25, iou_thres=0.5, **kwargs) -> None:
-        super().__init__(name=os.path.splitext(os.path.basename(weights))[0], **kwargs)
+    def __init__(self, weights, cfg=None, img_size=640, conf_thres=0.25, iou_thres=0.5, name=None, **kwargs) -> None:
+        if name is None:
+            name = os.path.splitext(os.path.basename(weights))[0]
+
+        super().__init__(name=name, **kwargs)
         self.cfg = cfg
         self.weights = weights
         self.conf_thres = conf_thres

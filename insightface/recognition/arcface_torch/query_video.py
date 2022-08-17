@@ -1,3 +1,8 @@
+import sys
+import os
+from pathlib import Path
+
+sys.path.insert(0, os.getcwd())
 
 from ai_util.imp_env import ImpEnv
 from ai_util.dataset import ImageDataset
@@ -5,10 +10,7 @@ import argparse
 import time
 import numpy as np
 import torch
-import os
-import sys
 import cv2
-from pathlib import Path
 import mxnet
 import pandas
 
@@ -50,10 +52,10 @@ def query_demo(args):
         face_det_calib = args.calib_mode
         feat_extr_calib = args.calib_mode
 
-    face_det = Yolov5FacePredictor(cfg="yolov5_face/models/yolov5m_relu.yaml", weights="yolov5_face/weights/my/yolov5_relu.pt", 
+    face_det = Yolov5FacePredictor(cfg="yolov5_face/models/yolov5m_relu.yaml", weights="../weights/yolov5_face_relu.pt", name="../yolov5_face_relu",
         input_format="hwc", input_prec="i8", calib_mode=face_det_calib, quant_tag=face_det_calib).to(det_dev)
 
-    feat_extr = ArcFacePredictor(cfg="configs/ms1mv3_r50_leakyrelu.py", weights="runs/ms1mv3_r50_leakyrelu_1/model.pt", 
+    feat_extr = ArcFacePredictor(cfg="configs/ms1mv3_r50_leakyrelu.py", weights="../weights/ms1mv3_r50_leakyrelu_1.pt", name="../ms1mv3_r50_leakyrelu_1",
         input_format="hwc", input_prec="i8", calib_mode=feat_extr_calib, quant_tag=feat_extr_calib,
         normalize=True, batch_size=1, pad_batch=True).to(reg_dev)
 
@@ -64,6 +66,7 @@ def query_demo(args):
 
     gallery = FaceGallery(
         name=gallery_cache_name, 
+        gallery_dir="../galleries",
         data=ImageDataset(args.gallery, limit=None, frame_step=5), 
         data_extr=FaceExtractor(face_det), 
         feat_extr=feat_extr
@@ -82,12 +85,17 @@ def query_demo(args):
 
     query_results = gallery.query([query_db[0]["feat"]])[0]
 
+    out_dir = Path("../results/face/")
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    """
     out_dir = Path("results")
 
     if args.calib_mode is not None:
         out_dir /= args.calib_mode
 
     out_dir.mkdir(exist_ok=True)
+    """
 
     gallery.data.open()
 

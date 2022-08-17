@@ -956,9 +956,9 @@ class CalibrationDatasetImage(CalibrationDatasetBase):
             with open(img_path, "r") as f:
                 img_files = [os.path.join(root_path, p.rstrip()) for p in f.readlines()]
         else:
-            img_files = glob.glob(img_path)
+            img_files = sorted(glob.glob(img_path))
 
-        assert len(img_files) > 0
+        assert len(img_files) > 0, f"No files found in {img_path}"
         assert os.path.exists(img_files[0])
 
         if limit is not None:

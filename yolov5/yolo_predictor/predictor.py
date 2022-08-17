@@ -106,9 +106,12 @@ class Yolov5Predictor(PredictorBase):
 
 
     def get_calibration_dataset(self):
-        if self.calib_data is not None:
+        if self.calib_data is not None and not isinstance(self.calib_data, str):
             data = self.calib_data
         else:
-            data = CalibrationDatasetImage("../data/CrowdHuman/images/val/*", limit=10 if (self.calib_mode is None or self.calib_mode == "minmax") else 100, needs_preproc=True)
+            assert self.calib_data is not None
+            path = self.calib_data if self.calib_data is not None else "../data/CrowdHuman/images/val/*"
+
+            data = CalibrationDatasetImage(path, limit=10 if (self.calib_mode is None or self.calib_mode == "minmax") else 100, needs_preproc=True)
         return data
 

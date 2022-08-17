@@ -69,7 +69,7 @@ class ArcFacePredictorSingle(PredictorBase):
         return super().to(device, *args, **kwargs)
 
     def get_calibration_dataset(self):
-        path = 'datasets/ms1m-retinaface-t1/lfw.bin'
+        path = '../data/ms1m-retinaface-t1/lfw.bin'
         dataset = verification.load_bin(path, image_size=(112, 112), limit=10 if (self.calib_mode is None or self.calib_mode == "minmax") else 100)
         dataset = dataset[0][0]
         dataset = ((dataset / 255) - 0.5) / 0.5

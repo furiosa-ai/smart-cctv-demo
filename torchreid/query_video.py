@@ -1,10 +1,15 @@
+import sys
+import os
+from pathlib import Path
+
+sys.path.insert(0, os.getcwd())
+
 import argparse
 import numpy as np
 import torch
 from torch.utils.tensorboard import SummaryWriter
 import onnx
 import cv2
-from pathlib import Path
 import pandas
 from ai_util.dataset import ImageDataset
 from ai_util.imp_env import ImpEnv
@@ -44,21 +49,27 @@ def query_demo(args):
         person_det_calib = args.calib_mode
         feat_extr_calib = args.calib_mode
 
-    person_det = Yolov5Predictor(cfg="yolov5/models/yolov5m_warboy.yaml", weights="yolov5/runs/train/bytetrack_mot20_5data/weights/best.pt", 
+    person_det = Yolov5Predictor(cfg="yolov5/models/yolov5m_warboy.yaml", weights="../weights/yolov5m_warboy.pt", name="../yolov5m_warboy",
+        calib_data="../data/CrowdHuman/images/val/*",
         input_format="hwc", input_prec="i8", calib_mode=person_det_calib, quant_tag=person_det_calib,
         input_size=(640, 640)).to(det_dev)
 
-    feat_extr = ReIdPredictor(cfg="configs/im_r50_softmax_256x128_amsgrad.yaml", weights="pretrained/resnet50_market_xent.pth.tar",
-       input_format="hwc", input_prec="i8", output_type="np", batch_size=1, pad_batch=True, 
-       calib_mode=feat_extr_calib, quant_tag=feat_extr_calib,).to(reg_dev)
+    feat_extr = ReIdPredictor(cfg="configs/im_r50_softmax_256x128_amsgrad.yaml", weights="../weights/resnet50_market_xent.pth.tar",
+        name="../resnet50_market_xent",
+        input_format="hwc", input_prec="i8", output_type="np", batch_size=1, pad_batch=True, 
+        calib_mode=feat_extr_calib, quant_tag=feat_extr_calib,).to(reg_dev)
 
     person_det.set_async_inference(True)
     feat_extr.set_async_inference(True)
 
+    tracker = None
+    # tracker = Tracker()
+
     gallery = ReIdGallery(
-        name="prw" + (f"_{args.calib_mode}" if args.calib_mode is not None else ""), 
+        name="prw" + (f"_{args.calib_mode}" if args.calib_mode is not None else ""),
+        gallery_dir="../galleries",
         data=ImageDataset(args.gallery, frame_step=10), 
-        data_extr=BoxExtractor(person_det, tracker=Tracker()), 
+        data_extr=BoxExtractor(person_det, tracker=tracker), 
         feat_extr=feat_extr
     )
 
@@ -74,12 +85,14 @@ def query_demo(args):
 
     query_results = gallery.query([query_db[0]["feat"]])[0]
 
-    out_dir = Path("results")
+    out_dir = Path("../results/reid/")
+    out_dir.mkdir(parents=True, exist_ok=True)
 
+    """
     if args.calib_mode is not None:
         out_dir /= args.calib_mode
     
-    out_dir.mkdir(exist_ok=True)
+    """
 
     write_img(out_dir / "query.jpg", query_db.vis_sample(0))
     for topi, res in enumerate(query_results):
