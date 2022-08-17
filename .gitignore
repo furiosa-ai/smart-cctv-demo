@@ -102,8 +102,6 @@ ENV/
 
 .DS_Store
 
-datasets/
-
 out/
 *.onnx
 *.png
