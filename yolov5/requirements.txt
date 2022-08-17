@@ -1,0 +1,27 @@
+# pip install -r requirements.txt
+Cython
+cython-bbox
+lap
+loguru
+matplotlib
+numpy
+onnx
+onnxruntime
+opencv-python
+pandas
+Pillow
+pynput
+PyQt5
+pyqtgraph
+PyYAML
+scipy
+seaborn
+six
+thop
+timm
+torch==1.11.0
+torchvision==0.12.0
+tqdm
+vispy==0.10.0
+requests
+tensorboard

@@ -1,0 +1,12 @@
+
+train: 
+  - ../data/MOT20/yolo/train_half.txt
+  - ../data/MOT17/yolo/train.txt
+  - ../data/CrowdHuman/train.txt
+  - ../data/ETHZ/train.txt
+  - ../data/Citypersons/train.txt
+val: ../data/MOT20/yolo/val_half.txt
+
+# Classes
+nc: 1  # number of classes
+names: ['person']

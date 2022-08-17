@@ -1,0 +1,49 @@
+root@kgalim-warboy:~/projects/yolov5#  /usr/bin/env /root/venv/furiosa/bin/python3 /root/.vscode-server/extensions/ms-python.python-2022.2.1924087327/pythonFiles/lib/python/debugpy/launcher 39189
+-- run/infer/furiosa_run.py --quant --model cfg/infer_models/warboy.txt ^C
+root@kgalim-warboy:~/projects/yolov5# ^C
+root@kgalim-warboy:~/projects/yolov5# ^C
+root@kgalim-warboy:~/projects/yolov5#
+root@kgalim-warboy:~/projects/yolov5#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,9 @@
+
+train: 
+  - ../data/MOT17/yolo/train_half.txt
+  - ../data/CrowdHuman/train.txt
+val: ../data/MOT17/yolo/val_half.txt
+
+# Classes
+nc: 1  # number of classes
+names: ['person']

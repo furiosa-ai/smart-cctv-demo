@@ -1,0 +1,50 @@
+# cfg/mot_test_pipeline.yaml
+system:
+  multiproc: "process"  # "process" (speed) or "thread" (debug)
+  # frame_limit: 30
+
+mot:
+  detector: 
+    model:
+      instance_count: 2  # how many devices (cpu, cuda, npus) to use
+      config: "models/yolov5m_warboy.yaml"  # yolo model config
+      weights: "runs/train/bytetrack_mot20_5data/weights/best.pt"  # yolo weights
+      device: "cpu"  # device ["cpu", "cuda", "furiosa"]
+      input_size: [512, 512]  # model input size [w,h]
+
+      input_type: "i8"
+      input_format: "hwc"
+
+    postproc:
+      conf_thres: 0.25
+      iou_thres: 0.45
+  
+  tracker:  # BYTETrack paramenters
+    track_thresh: 0.5
+    track_buffer: 30
+    match_thresh: 0.8
+
+  cameras:  # camera settings
+    - input: 
+        # uses cv2.VideoCapture
+        # as src specify camera index, video file, image folder, rtsp address, ...
+        src: /Users/kevin/Downloads/rec/cam101.mp4
+      calib: cfg/calib/fur15/cam_calib101.yaml  # just for test (not calibrated yet)
+      undistort: True
+    - input: 
+        src: /Users/kevin/Downloads/rec/cam102.mp4
+      calib: cfg/calib/fur15/cam_calib102.yaml  # just for test (not calibrated yet)
+      undistort: True
+    - input: 
+        # src: rtsp://admin:!2gkakCVPR@192.168.1.103/profile2/media.smp
+        src: /Users/kevin/Downloads/rec/cam103.mp4
+      calib: cfg/calib/fur15/cam_calib103.yaml  # just for test (not calibrated yet)
+      undistort: True
+    - input: 
+        src: /Users/kevin/Downloads/rec/cam105.mp4
+      calib: cfg/calib/fur15/cam_calib105.yaml  # just for test (not calibrated yet)
+      undistort: True
+display:
+  plot_cols: 2  # how many columns for image grid and plotting
+  size_per_mot: [640, 384]  # at which resolution to display each camera frame
+  show_plot: True

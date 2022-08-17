@@ -1,0 +1,38 @@
+# cfg/mot_test_pipeline.yaml
+mcmot:
+  multiproc: "process"  # "process" (speed) or "thread" (debug)
+
+mot:
+  detector: 
+    model:
+      instance_count: 1  # how many devices (cpu, cuda, npus) to use
+      multiproc: "process"  # "process" (speed) or "thread" (debug)
+      config: "models/yolov5m_warboy.yaml"  # yolo model config
+      weights: "runs/train/bytetrack_mot20_5data/weights/best.pt"  # yolo weights
+      device: "cpu"  # device ["cpu", "cuda", "furiosa"]
+      input_size: [512, 512]  # model input size [w,h]
+
+    nms:  # nms parameters
+      conf_thres: 0.25
+      iou_thres: 0.45
+  
+  tracker:  # BYTETrack paramenters
+    track_thresh: 0.5
+    track_buffer: 30
+    match_thresh: 0.8
+
+  cameras:  # camera settings
+    - input: 
+        # uses cv2.VideoCapture
+        # as src specify camera index, video file, image folder, rtsp address, ...
+        src: datasets/test_vid/people_tracking0.mp4
+        # optionally limit the number of frames to read from a video
+        frame_limit: 50
+      calib: cfg/calib/wildtrack/cam_calib0.yaml  # just for test (not calibrated yet)
+    - input: 
+        src: datasets/test_vid/people_tracking1.mp4
+        frame_limit: 50
+      calib: cfg/calib/wildtrack/cam_calib1.yaml  # just for test (not calibrated yet)
+display:
+  plot_cols: 4  # how many columns for image grid and plotting
+  size_per_mot: [640, 384]  # at which resolution to display each camera frame

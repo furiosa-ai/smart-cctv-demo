@@ -1,0 +1,98 @@
+# cfg/mot_test_pipeline.yaml
+system:
+  use_shm: True
+  multiproc: "process"  # "process" (speed) or "thread" (debug)
+  # frame_limit: 30
+
+mcmot:
+  stub: True
+
+mot:
+  smooth_timeout: True
+  max_traj_length: 200
+  proj3d: True
+
+  detector: 
+    model:
+      instance_count: 2  # how many devices (cpu, cuda, npus) to use
+      config: "models/yolov5m_warboy.yaml"  # yolo model config
+      weights: "runs/train/bytetrack_mot20_5data/weights/best.pt"  # yolo weights
+      #config: "models/yolov5l.yaml"  # yolo model config
+      #weights: "runs/train/bytetrack_mot20_5data_yolov5l/weights/best.pt"
+      device: "furiosa"  # device ["cpu", "cuda", "furiosa"]
+      input_size: [640, 384]  # model input size [w,h]
+
+      input_type: "i8"
+      input_format: "hwc"
+
+    postproc:
+      conf_thres: 0.25
+      iou_thres: 0.45
+  
+  tracker:  # BYTETrack paramenters
+    track_thresh: 0.5
+    track_buffer: 30
+    match_thresh: 0.8
+
+  cameras:  # camera settings
+    - input: 
+        # uses cv2.VideoCapture
+        # as src specify camera index, video file, image folder, rtsp address, ...
+        #src: v4l2src device=/dev/video0 ! video/x-raw,width=640,height=360,framerate=30/1 ! decodebin ! videoconvert ! appsink
+        src: rtsp://admin:!2gkakCVPR@192.168.1.102/profile2/media.smp
+        #src: datasets/MOT20/vid/MOT20-02-640.mp4
+        size: [640, 360]
+      calib: cfg/calib/fur15/cam_calib102.yaml  # just for test (not calibrated yet)
+      undistort: True
+      comp_trajs: True
+    - input: 
+        #src: datasets/MOT20/vid/MOT20-02-640.mp4
+        src: rtsp://admin:!2gkakCVPR@192.168.1.103/profile2/media.smp
+        size: [640, 360]
+      calib: cfg/calib/fur15/cam_calib103.yaml  # just for test (not calibrated yet)
+      undistort: True
+      comp_trajs: True
+    - input: 
+        # src: rtsp://admin:!2gkakCVPR@192.168.1.103/profile2/media.smp
+        src: datasets/Sample_Basketball.mp4
+        size: [640, 360]
+        loop_video: True
+      calib: cfg/calib/fur15/cam_calib103.yaml  # just for test (not calibrated yet)
+      undistort: False
+      comp_trajs: False
+    - input: 
+        src: datasets/Sample_Marathon_flip.mp4
+        size: [640, 360]
+        loop_video: True
+      calib: cfg/calib/fur15/cam_calib105.yaml  # just for test (not calibrated yet)
+      undistort: False
+      comp_trajs: False
+
+display:
+  plot_cols: 2  # how many columns for image grid and plotting
+  size_per_mot: [640, 360]  # at which resolution to display each camera frame
+  show_track_ids: False
+  single_window: True
+  plots: 
+    - plot_type: 3d
+      #floor_img: "cam_calib_data/fur15/proj.jpg"
+      floor_img_xyxy: [-10, -10, 10, 10]
+      show_sub_plot:
+        local: [0] #  [0, 1, 2, 3]
+        local_all: False
+        global: False
+    - plot_type: 2d
+      #floor_img: "cam_calib_data/fur15/proj.jpg"
+      floor_img_xyxy: [-10, -10, 10, 10]
+      plot_vert_lines: False
+      show_sub_plot:
+        local: [0] #  [0, 1, 2, 3]
+        local_all: False
+        global: False
+  #- plot_type: 3d
+  #  floor_img: "cam_calib_data/fur15/proj.jpg"
+  #  floor_img_xyxy: [-10, -10, 10, 10]
+  #  show_sub_plot:
+  #    local: [3] #  [0, 1, 2, 3]
+  #    local_all: False
+  #    global: False

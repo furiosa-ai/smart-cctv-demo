@@ -1,0 +1,8 @@
+
+path: ../data/open-images-v6/yolo/person
+train: train_small.txt
+val: val_small.txt
+
+# Classes
+nc: 1  # number of classes
+names: ['person']

@@ -1,0 +1,96 @@
+# cfg/mot_test_pipeline.yaml
+system:
+  use_shm: True
+  multiproc: "process"  # "process" (speed) or "thread" (debug)
+  # frame_limit: 30
+
+mcmot:
+  stub: True
+  as_sep_proc: True
+
+mot:
+  smooth_timeout: True
+  max_traj_length: 10000
+  proj3d: True
+
+  detector: 
+    model:
+      instance_count: 1  # how many devices (cpu, cuda, npus) to use
+      config: "models/yolov5m_warboy.yaml"  # yolo model config
+      weights: "runs/train/bytetrack_mot20_5data/weights/best.pt"  # yolo weights
+      device: "cpu"  # device ["cpu", "cuda", "furiosa"]
+      input_size: [512, 512]  # model input size [w,h]
+
+      input_type: "i8"
+      input_format: "hwc"
+
+    postproc:
+      conf_thres: 0.25
+      iou_thres: 0.45
+  
+  tracker:  # BYTETrack paramenters
+    track_thresh: 0.5
+    track_buffer: 30
+    match_thresh: 0.8
+
+  cameras:  # camera settings
+    - input: 
+        # uses cv2.VideoCapture
+        # as src specify camera index, video file, image folder, rtsp address, ...
+        src: datasets/MOT20/vid/MOT20-02-640.mp4
+        size: [640, 360]
+      calib: cfg/calib/fur15/cam_calib101.yaml  # just for test (not calibrated yet)
+      undistort: True
+      comp_trajs: True
+    - input: 
+        src: datasets/MOT20/vid/MOT20-02-640.mp4
+        size: [640, 360]
+      calib: cfg/calib/fur15/cam_calib102.yaml  # just for test (not calibrated yet)
+      undistort: True
+      comp_trajs: False
+    - input: 
+        # src: rtsp://admin:!2gkakCVPR@192.168.1.103/profile2/media.smp
+        src: datasets/MOT20/vid/MOT20-02-640.mp4
+        size: [640, 360]
+      calib: cfg/calib/fur15/cam_calib103.yaml  # just for test (not calibrated yet)
+      undistort: True
+      comp_trajs: False
+    - input: 
+        src: datasets/MOT20/vid/MOT20-02-640.mp4
+        size: [640, 360]
+      calib: cfg/calib/fur15/cam_calib105.yaml  # just for test (not calibrated yet)
+      undistort: True
+      comp_trajs: False
+display:
+  size_per_mot: [640, 360]  # at which resolution to display each camera frame
+  show_track_ids: False
+  plot_cols: 2  # how many columns for image grid and plotting
+  single_window: True
+  plots:
+    - plot_type: 3d
+      floor_img: "cam_calib_data/fur15/proj.jpg"
+      floor_img_xyxy: [-10, -10, 10, 10]
+      show_sub_plot:
+        local: [0] #  [0, 1, 2, 3]
+        local_all: False
+        global: False
+    # - plot_type: 3d
+    #   plot_heads: False
+    #   plot_vert_lines: False
+    #   plot_axes: True
+    #   floor_img_xyxy: [-10, -10, 10, 10]
+    #   show_sub_plot:
+    #     local: [0] #  [0, 1, 2, 3]
+    #     local_all: False
+    #     global: False
+    # - plot_type: 2d
+    #   floor_img: "cam_calib_data/fur15/proj.jpg"
+    #   floor_img_xyxy: [-10, -10, 10, 10]
+    #   show_sub_plot:
+    #     local: [0] #  [0, 1, 2, 3]
+    #     local_all: False
+    #     global: False
+  romp:
+    input: 
+      src: ../ROMP/demo/videos/sample_video.mp4
+      size: [1280, 720]

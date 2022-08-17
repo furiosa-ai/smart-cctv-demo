@@ -1,0 +1,8 @@
+
+path: /mnt/sda/Documents/projects/data/car/yolov5
+train: train.txt
+val: val.txt
+
+# Classes
+nc: 2  # number of classes
+names: ['face', 'license_plate']

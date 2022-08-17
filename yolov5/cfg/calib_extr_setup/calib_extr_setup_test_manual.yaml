@@ -1,0 +1,9 @@
+mode: "manual"  # auto (detect corners automatically), semi (select region by mouse and then detect automatically), manual (select rect by mouse)
+# chess_size: [9, 6]
+camera_chess_regions:  # x1, y1, w, h, num_squares_x (default: w - 1), num_squares_y (default: h - 1)
+  - [0, 0, 9, 6, 1, 1]
+  - [0, 0, 9, 6, 1, 1]
+  - [0, 0, 9, 6, 1, 1]
+  - [0, 0, 9, 6, 1, 1]
+square_scale: 1  # size of a square in meter (calib grid will be multipled with), necessary for traj match thresh
+# img_size: [1280, 720]

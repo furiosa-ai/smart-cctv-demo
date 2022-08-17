@@ -1,0 +1,19 @@
+
+path: ../data/bdd100k
+train: train.txt
+val: val.txt
+
+# Classes
+nc: 10  # number of classes
+names: [
+  "person",
+  "rider",
+  "car",
+  "truck",
+  "bus",
+  "train",
+  "motor",
+  "bike",
+  "traffic light",
+  "traffic sign",
+]

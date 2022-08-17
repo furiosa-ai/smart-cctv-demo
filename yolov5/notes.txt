@@ -1,0 +1,71 @@
+OMP_NUM_THREADS=4 
+
+# compile opencv
+cmake -D CMAKE_BUILD_TYPE=RELEASE \
+-D CMAKE_INSTALL_PREFIX=$CONDA_PREFIX \
+-D INSTALL_PYTHON_EXAMPLES=ON \
+-D INSTALL_C_EXAMPLES=ON \
+-D BUILD_DOCS=OFF \
+-D BUILD_PERF_TESTS=OFF \
+-D BUILD_TESTS=OFF \
+-D BUILD_PACKAGE=OFF \
+-D BUILD_EXAMPLES=OFF \
+-D WITH_TBB=ON \
+-D ENABLE_FAST_MATH=1 \
+-D CUDA_FAST_MATH=1 \
+-D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.5 \
+-D WITH_CUDA=ON \
+-D WITH_CUBLAS=ON \
+-D WITH_CUFFT=ON \
+-D WITH_NVCUVID=ON \
+-D WITH_IPP=OFF \
+-D WITH_V4L=ON \
+-D WITH_1394=OFF \
+-D WITH_GTK=ON \
+-D WITH_QT=OFF \
+-D WITH_OPENGL=ON \
+-D WITH_EIGEN=ON \
+-D WITH_FFMPEG=ON \
+-D WITH_GSTREAMER=ON \
+-D BUILD_JAVA=OFF \
+-D BUILD_opencv_python3=ON \
+-D BUILD_opencv_python2=OFF \
+-D BUILD_NEW_PYTHON_SUPPORT=ON \
+-D OPENCV_SKIP_PYTHON_LOADER=ON \
+-D OPENCV_GENERATE_PKGCONFIG=ON \
+-D OPENCV_ENABLE_NONFREE=ON \
+-D OPENCV_EXTRA_MODULES_PATH=/home/furiosa/opencv/opencv_contrib/modules \
+-D PYTHON3_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
+-D PYTHON3_PACKAGES_PATH=$(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
+-D PYTHON_EXECUTABLE=$(which python) \
+-D PYTHON3_EXECUTABLE=$(which python) \
+-D BUILD_JPEG=ON 
+-D WITH_JPEG=ON
+..
+
+make
+make install
+
+
+fur15 floor square: 0.47meter
+
+
+
+# vid record to avoid reencoding and to get proper sync
+gst-launch-1.0 -v -e rtspsrc 'location=rtsp://admin:!2gkakCVPR@192.168.1.101/profile2/media.smp' latency=0 ! rtph264depay ! h264parse ! mp4mux ! filesink location=out.mp4
+
+gst-launch-1.0 -v -e \
+multiqueue max-size-buffers=1 name=mqueue \
+rtspsrc 'location=rtsp://admin:!2gkakCVPR@192.168.1.101/profile2/media.smp' latency=0 ! rtph264depay ! h264parse ! mp4mux !  mqueue.sink_1 \
+rtspsrc 'location=rtsp://admin:!2gkakCVPR@192.168.1.102/profile2/media.smp' latency=0 ! rtph264depay ! h264parse ! mp4mux !  mqueue.sink_2 \
+rtspsrc 'location=rtsp://admin:!2gkakCVPR@192.168.1.103/profile2/media.smp' latency=0 ! rtph264depay ! h264parse ! mp4mux !  mqueue.sink_3 \
+rtspsrc 'location=rtsp://admin:!2gkakCVPR@192.168.1.105/profile2/media.smp' latency=0 ! rtph264depay ! h264parse ! mp4mux !  mqueue.sink_4 \
+mqueue.src_1 ! filesink location=cam101.mp4 \
+mqueue.src_2 ! filesink location=cam102.mp4 \
+mqueue.src_3 ! filesink location=cam103.mp4 \
+mqueue.src_4 ! filesink location=cam105.mp4
+
+
+# measure perf
+viztracer --log_sparse  -- run/mcmot_demo.py --cfg cfg/mot_fur15_pipeline.yaml --hide_vid --record --device furioas
+viztracer --include_files ./ /home/furiosa/anaconda3/envs/torch/lib/python3.8/multiprocessing --ignore_c_function --ignore_frozen --log_sparse  -- run/mcmot_demo.py --cfg cfg/mot_fur15_pipeline.yaml --hide_vid --record
