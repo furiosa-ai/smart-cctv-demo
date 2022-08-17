@@ -122,8 +122,3 @@ yolov5_face
 
 galleries/
 *.dfg
-
-ai_util
-insightface
-torchreid
-yolov5
