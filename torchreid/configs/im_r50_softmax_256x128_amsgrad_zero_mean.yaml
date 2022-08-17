@@ -1,0 +1,38 @@
+model:
+  name: 'resnet50'
+  pretrained: True
+
+data:
+  norm_mean: [0, 0, 0]
+  norm_std: [1, 1, 1]
+  type: 'image'
+  sources: ['market1501']
+  targets: ['market1501']
+  height: 256
+  width: 128
+  combineall: False
+  transforms: ['random_flip']
+  save_dir: 'log/im_r50_softmax_256x128_amsgrad_zero_mean'
+
+loss:
+  name: 'softmax'
+  softmax:
+    label_smooth: True
+
+train:
+  optim: 'amsgrad'
+  lr: 0.0003
+  max_epoch: 60
+  batch_size: 32
+  fixbase_epoch: 5
+  open_layers: ['classifier']
+  lr_scheduler: 'single_step'
+  stepsize: [20]
+
+test:
+  batch_size: 16
+  dist_metric: 'euclidean'
+  normalize_feature: False
+  evaluate: False
+  eval_freq: 1
+  rerank: False
