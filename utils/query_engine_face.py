@@ -12,7 +12,7 @@ from utils.query_engine_base import QueryEngineBase
 from ext_modules import ArcFacePredictor, FaceExtractor, FaceGallery, Yolov5FacePredictor
 
 class QueryEngineFace(QueryEngineBase):
-    def __init__(self, device="cpu", calib_mode=None, topk=5) -> None:
+    def __init__(self, device="cpu", calib_mode=None, topk=5, gallery_cache_builder=None) -> None:
         super().__init__(topk=topk)
 
         if device == "furiosa":
@@ -30,6 +30,7 @@ class QueryEngineFace(QueryEngineBase):
 
         self.gallery = None
         self.path = None
+        self.gallery_cache_builder = gallery_cache_builder
 
     def set_gallery_data(self, path):
         self.path = path
@@ -38,7 +39,11 @@ class QueryEngineFace(QueryEngineBase):
         return self.gallery_data
 
     def process_gallery_data(self):
-        gallery_cache_name = os.path.abspath(self.path).replace("/", "_")
+        if self.gallery_cache_builder is not None:
+            gallery_cache_name = self.gallery_cache_builder("face", self.path)
+        else:
+            gallery_cache_name = os.path.abspath(self.path).replace("/", "_")
+        
         print(gallery_cache_name)
         self.gallery = FaceGallery(
             name=gallery_cache_name, 

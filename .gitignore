@@ -118,9 +118,12 @@ edge_ai
 *.swp
 
 galleries/
+galleries_bak/
 *.dfg
 
 data/
 data_bak/
 data_archive/
 tmp/
+
+cfg/server_kevin.yaml

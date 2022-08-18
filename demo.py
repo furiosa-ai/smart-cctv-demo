@@ -1,6 +1,9 @@
 
+import argparse
+from functools import partial
 import sys
 import os
+import yaml
 
 sys.path.insert(0, os.getcwd())
 
@@ -10,6 +13,7 @@ import ext_modules
 # from utils.query_engine_dummy import QueryEngineDummy
 from utils.query_engine_reid import QueryEngineReId
 from utils.query_engine_face import QueryEngineFace
+from utils.query_engine_base import GalleryCacheBuilderRemote
 
 from collections import OrderedDict
 import sys
@@ -84,13 +88,25 @@ class VideoAnalyzeWidget(QWidget):
     
 
 class App(QWidget):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, args, parent=None) -> None:
         super().__init__(parent)
+
+        if args.server is not None:
+            with open(args.server, "r") as f:
+                server_cfg = yaml.safe_load(f)
+
+            gallery_cache_builder = GalleryCacheBuilderRemote(**server_cfg)
+        else:
+            gallery_cache_builder = None
+
+        query_engine_args = dict(
+            gallery_cache_builder=gallery_cache_builder,
+        )
 
         self.cur_widget = None
         self.analyze_widgets = [
-            ("Face", VideoAnalyzeWidget(QueryEngineFace)),
-            ("Person", VideoAnalyzeWidget(QueryEngineReId))
+            ("Face", VideoAnalyzeWidget(partial(QueryEngineFace, **query_engine_args))),
+            ("Person", VideoAnalyzeWidget(partial(QueryEngineReId, **query_engine_args)))
         ]
 
         names, _ = zip(*self.analyze_widgets)
@@ -116,9 +132,12 @@ class App(QWidget):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--server", default="cfg/server_vis.yaml")
+    args = parser.parse_args()
 
     app = QApplication(sys.argv)
-    a = App()
+    a = App(args)
     a.show()
     sys.exit(app.exec_())
 

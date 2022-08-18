@@ -1,0 +1,9 @@
+# ~/.ssh/config
+# Host vis
+#    HostName 210.109.63.237
+#    User ubuntu
+#    IdentityFile ~/.ssh/vision-intelligence.pem
+
+hostname: vis
+proj_dir_dst: ~/smart-cctv-demo
+conda_env_name_dst: cctv

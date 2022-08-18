@@ -96,4 +96,27 @@ python query_video.py \
   --device furiosa
 ```
 
-## Run client
+## GUI
+
+- Local inference
+
+  ```bash
+  python demo.py
+  ```
+
+- Server inference
+
+  Add to ~/.ssh/config
+
+  ```
+  Host vis
+    HostName 210.109.63.237
+    User ubuntu
+    IdentityFile ~/.ssh/vision-intelligence.pem
+    IdentitiesOnly yes
+  ```
+
+  Run
+  ```bash
+  python demo.py --server cfg/server_vis.yaml
+  ```

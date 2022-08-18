@@ -12,7 +12,7 @@ from utils.query_engine_base import QueryEngineBase
 from ext_modules import ReIdPredictor, BoxExtractor, BoxExtractorIdentity, ReIdGallery, Yolov5Predictor, Tracker
 
 class QueryEngineReId(QueryEngineBase):
-    def __init__(self, device="cpu", topk=5) -> None:
+    def __init__(self, device="cpu", topk=5, gallery_cache_builder=None) -> None:
         super().__init__(topk=topk)
 
         person_det_calib, feat_extr_calib = "entropy", "minmax"
@@ -32,6 +32,7 @@ class QueryEngineReId(QueryEngineBase):
 
         self.gallery = None
         self.path = None
+        self.gallery_cache_builder = gallery_cache_builder
 
     def set_gallery_data(self, path):
         self.path = path
@@ -40,7 +41,11 @@ class QueryEngineReId(QueryEngineBase):
         return self.gallery_data
 
     def process_gallery_data(self):
-        gallery_cache_name = os.path.abspath(self.path).replace("/", "_")
+        if self.gallery_cache_builder is not None:
+            gallery_cache_name = self.gallery_cache_builder("person", self.path)
+        else:
+            gallery_cache_name = os.path.abspath(self.path).replace("/", "_")
+        
         print(gallery_cache_name)
         self.gallery = ReIdGallery(
             name=gallery_cache_name, 
