@@ -120,3 +120,18 @@ python query_video.py \
   ```bash
   python demo.py --server cfg/server_vis.yaml
   ```
+
+## Demo
+
+
+<details><summary>Face recognition</summary>
+
+  ![face recognition](doc/face_reg.gif)
+</details>
+
+
+<details><summary>Person recognition</summary>
+
+  ![person detection](doc/reid.gif)
+</details>
+
