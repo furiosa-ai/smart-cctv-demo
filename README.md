@@ -78,7 +78,7 @@ weights
 # Optionally clear cache
 rm *.onnx  # f32 model cache
 rm *.dfg  # i8 model cache
-rm galleries/*  # gallery cache
+rm -rf galleries/*  # gallery cache
 rm -rf results/*  # delete previous results
 
 # Face recognition (results will be written to "results/face")
