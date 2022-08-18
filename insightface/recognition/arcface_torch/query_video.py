@@ -59,52 +59,58 @@ def query_demo(args):
         input_format="hwc", input_prec="i8", calib_mode=feat_extr_calib, quant_tag=feat_extr_calib,
         normalize=True, batch_size=1, pad_batch=True).to(reg_dev)
 
-    gallery_cache_name = os.path.abspath(args.gallery).replace("/", "_") + (f"_{args.calib_mode}" if args.calib_mode is not None else "")
+    gallery_dir = "../galleries/face"
+
+    if args.gallery_name is not None:
+        gallery_cache_name = args.gallery_name
+    else:
+        gallery_cache_name = os.path.abspath(args.gallery).replace("/", "_") + (f"_{args.calib_mode}" if args.calib_mode is not None else "")
 
     face_det.set_async_inference(True)
     feat_extr.set_async_inference(True)
 
     gallery = FaceGallery(
         name=gallery_cache_name, 
-        gallery_dir="../galleries",
+        gallery_dir=gallery_dir,
         data=ImageDataset(args.gallery, limit=None, frame_step=5), 
         data_extr=FaceExtractor(face_det), 
         feat_extr=feat_extr
     )
-
+    
     face_det.set_async_inference(False)
     feat_extr.set_async_inference(False)
 
-    print("Created gallery")
-    
-    query_db = FaceGallery(
-        data=ImageDataset([args.query]), 
-        data_extr=FaceExtractor(face_det, single_face=True), 
-        feat_extr=feat_extr
-    )
+    print(f"Wrote gallery to {gallery_dir + gallery_cache_name + '.npz'}")
 
-    query_results = gallery.query([query_db[0]["feat"]])[0]
+    if args.query is not None:
+        query_db = FaceGallery(
+            data=ImageDataset([args.query]), 
+            data_extr=FaceExtractor(face_det, single_face=True), 
+            feat_extr=feat_extr
+        )
 
-    out_dir = Path("../results/face/")
-    out_dir.mkdir(parents=True, exist_ok=True)
+        query_results = gallery.query([query_db[0]["feat"]])[0]
 
-    """
-    out_dir = Path("results")
+        out_dir = Path("../results/face/")
+        out_dir.mkdir(parents=True, exist_ok=True)
 
-    if args.calib_mode is not None:
-        out_dir /= args.calib_mode
+        """
+        out_dir = Path("results")
 
-    out_dir.mkdir(exist_ok=True)
-    """
+        if args.calib_mode is not None:
+            out_dir /= args.calib_mode
 
-    gallery.data.open()
+        out_dir.mkdir(exist_ok=True)
+        """
 
-    write_img(out_dir / "query.jpg", query_db.vis_sample(0))
-    for topi, res in enumerate(query_results):
-        idx = res.entry_idx
-        dist = res.dist
+        gallery.data.open()
 
-        write_img(out_dir / f"top_{topi+1}.jpg", gallery.vis_sample(idx, label=str(dist)))
+        write_img(out_dir / "query.jpg", query_db.vis_sample(0))
+        for topi, res in enumerate(query_results):
+            idx = res.entry_idx
+            dist = res.dist
+
+            write_img(out_dir / f"top_{topi+1}.jpg", gallery.vis_sample(idx, label=str(dist)))
 
     print(f"Took {time.time() - t1:.2f}s")
 
@@ -112,9 +118,10 @@ def query_demo(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--gallery", required=True)
-    parser.add_argument("--query", required=True)
+    parser.add_argument("--query")
     parser.add_argument("--device", required=True)
     parser.add_argument("--calib_mode", default="entropy_minmax")
+    parser.add_argument("--gallery_name")
     args = parser.parse_args()
 
     query_demo(args)

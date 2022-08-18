@@ -50,7 +50,7 @@ def query_demo(args):
         feat_extr_calib = args.calib_mode
 
     person_det = Yolov5Predictor(cfg="yolov5/models/yolov5m_warboy.yaml", weights="../weights/yolov5m_warboy.pt", name="../yolov5m_warboy",
-        calib_data="../data/CrowdHuman/images/val/*",
+        calib_data="../data/CrowdHuman/Images/*",
         input_format="hwc", input_prec="i8", calib_mode=person_det_calib, quant_tag=person_det_calib,
         input_size=(640, 640)).to(det_dev)
 
@@ -65,49 +65,60 @@ def query_demo(args):
     tracker = None
     # tracker = Tracker()
 
+    gallery_dir = "../galleries/person"
+
+    if args.gallery_name is not None:
+        gallery_cache_name = args.gallery_name
+    else:
+        gallery_cache_name = os.path.abspath(args.gallery).replace("/", "_") + (f"_{args.calib_mode}" if args.calib_mode is not None else "")
+
     gallery = ReIdGallery(
-        name="prw" + (f"_{args.calib_mode}" if args.calib_mode is not None else ""),
-        gallery_dir="../galleries",
+        name=gallery_cache_name, 
+        gallery_dir=gallery_dir,
         data=ImageDataset(args.gallery, frame_step=10), 
         data_extr=BoxExtractor(person_det, tracker=tracker), 
         feat_extr=feat_extr
     )
-
+    
     person_det.set_async_inference(False)
     feat_extr.set_async_inference(False)
 
-    query_db = ReIdGallery(
-        data=ImageDataset([args.query]),
-        data_extr=BoxExtractorIdentity(), 
-        # data_extr=BoxExtractor(person_det, single_box=True), 
-        feat_extr=feat_extr
-    )
-
-    query_results = gallery.query([query_db[0]["feat"]])[0]
-
-    out_dir = Path("../results/reid/")
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    """
-    if args.calib_mode is not None:
-        out_dir /= args.calib_mode
+    print(f"Wrote gallery to {gallery_dir + gallery_cache_name + '.npz'}")
     
-    """
+    if args.query is not None:
+        query_db = ReIdGallery(
+            data=ImageDataset([args.query]),
+            data_extr=BoxExtractorIdentity(), 
+            # data_extr=BoxExtractor(person_det, single_box=True), 
+            feat_extr=feat_extr
+        )
 
-    write_img(out_dir / "query.jpg", query_db.vis_sample(0))
-    for topi, res in enumerate(query_results):
-        idx = res.entry_idx
-        dist = res.dist
+        query_results = gallery.query([query_db[0]["feat"]])[0]
 
-        write_img(out_dir / f"top_{topi+1}.jpg", gallery.vis_sample(idx, label=str(dist)))
+        out_dir = Path("../results/reid/")
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        """
+        if args.calib_mode is not None:
+            out_dir /= args.calib_mode
+        
+        """
+
+        write_img(out_dir / "query.jpg", query_db.vis_sample(0))
+        for topi, res in enumerate(query_results):
+            idx = res.entry_idx
+            dist = res.dist
+
+            write_img(out_dir / f"top_{topi+1}.jpg", gallery.vis_sample(idx, label=str(dist)))
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--gallery", required=True)
-    parser.add_argument("--query", required=True)
+    parser.add_argument("--query")
     parser.add_argument("--device", required=True)
     parser.add_argument("--calib_mode", default="entropy_minmax")
+    parser.add_argument("--gallery_name")
     args = parser.parse_args()
 
     query_demo(args)

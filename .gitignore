@@ -121,3 +121,6 @@ galleries/
 *.dfg
 
 data/
+data_bak/
+data_archive/
+tmp/

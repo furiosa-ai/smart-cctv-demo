@@ -220,7 +220,7 @@ dependencies:
     - furiosa-litmus==0.8.0.dev220714
     - furiosa-models==0.8.0.dev220714
     - furiosa-quantizer==0.8.0.dev220714
-    - furiosa-quantizer-experimental==0.1.0.dev220816
+    - furiosa-quantizer-experimental==0.1.0.dev220810
     - furiosa-registry==0.8.0.dev220714
     - furiosa-runtime==0.8.0.dev220714
     - furiosa-sdk==0.8.0.dev220810

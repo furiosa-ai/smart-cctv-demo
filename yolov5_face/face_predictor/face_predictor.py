@@ -156,7 +156,7 @@ class Yolov5FacePredictor(PredictorBase):
         return super().to(device, *args, **kwargs)
 
     def get_calibration_dataset(self):
-        return CalibrationDatasetImage("../data/WIDERFACE/train/*/*.jpg", needs_preproc=True, limit=10 if (self.calib_mode is None or self.calib_mode == "minmax") else 100)
+        return CalibrationDatasetImage("../data/WIDER_val/images/*/*.jpg", needs_preproc=True, limit=10 if (self.calib_mode is None or self.calib_mode == "minmax") else 100)
         # return CalibrationDatasetImage("data/images/result.jpg", limit=1)
 
     def _box_decode(self, x):
